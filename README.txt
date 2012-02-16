@@ -13,4 +13,8 @@ You can now modify the sketch and save under your own sketch name.
 
 Note that the Freeduino board compiles as an Uno.
 
+There are some simplifed examples that you can use to build more complex code, specifically, FreeduinoSimple.
+
+Note, that if you use the serial monitor to watch messages, it has to be opened before you plug in the tablet.  When you open the serial monitor it resets the arduino and, if the tablet is already attached to the arduino, it gets confused by the reset.
+
 
