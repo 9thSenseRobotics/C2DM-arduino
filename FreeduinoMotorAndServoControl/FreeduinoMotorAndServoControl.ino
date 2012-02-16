@@ -132,9 +132,19 @@ void loop()
 	if (acc.isConnected()) {
 	  int len = acc.read(msg, sizeof(msg), 1);
           if (len > 0) {
-	    if (msg[0] == 0x2) {
-        	switch (msg[1])
-                {
+            Serial.println();
+            Serial.println(msg[0]);
+            Serial.println(msg[1]);
+            Serial.println(msg[2]);
+
+	    if (msg[1])
+            {
+              speedToGo = msg[2];
+              stepsToGo = msg[2];
+            }
+            
+            switch (msg[0])
+            {
                   case 'W':    // move forward
                   case 'w':
                   case 'f':    // just for testing with web ***********************************
@@ -229,7 +239,7 @@ void loop()
                     break;
                 }
             }
-          }
+          
         }
 	delay(10);
 }
