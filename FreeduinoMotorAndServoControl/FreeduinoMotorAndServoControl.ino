@@ -9,17 +9,19 @@
 #include <Servo.h>
 
 
-#define tiltPin 3
-#define panPin 5
-#define rightMotorPWM 6
-#define leftMotorPWM 8
-#define rightMotorDirection 2
-#define leftMotorDirection 4
+#define tiltPin 2
+#define panPin 3
+#define rightMotorPWM 5
+#define leftMotorPWM 6
+#define rightMotorDirectionA 4
+#define rightMotorDirectionB 7
+#define leftMotorDirectionA 8
+#define leftMotorDirectionB 9
 
 #define SERIALSPEED 57600
 
 #define TIMED_OUT 8000
-#define DEFAULT_SPEED 220
+#define DEFAULT_SPEED 150
 #define LEFT_MOTOR_BIAS 10
 
 #define TILT_CENTER 53
@@ -55,37 +57,51 @@ float batteryRange;
 void move(int speed) // speed goes from -255 to 255
 {
   if (speed < 0) {
-    digitalWrite(rightMotorDirection, HIGH);
-    digitalWrite(leftMotorDirection, LOW);
+    digitalWrite(rightMotorDirectionA, LOW);
+    digitalWrite(rightMotorDirectionB, HIGH);
+    digitalWrite(leftMotorDirectionA, LOW);
+    digitalWrite(leftMotorDirectionB, HIGH);
     speed = -speed;
   }
   else {
-    digitalWrite(rightMotorDirection, LOW);
-    digitalWrite(leftMotorDirection, HIGH);
+    digitalWrite(rightMotorDirectionA, HIGH);
+    digitalWrite(rightMotorDirectionB, LOW);
+    digitalWrite(leftMotorDirectionA, HIGH);
+    digitalWrite(leftMotorDirectionB, LOW);
   }
 
   if (speed > 255) speed = 255;  
     
   analogWrite(rightMotorPWM, speed);
   analogWrite(leftMotorPWM, speed);
+  
+  delay(1000);
+  Stop();
 }  
 
 void turn(int speed) // speed goes from -255 to 255
 {
   if (speed < 0) {
-    digitalWrite(rightMotorDirection, HIGH);
-    digitalWrite(leftMotorDirection, HIGH);
+    digitalWrite(rightMotorDirectionA, LOW);
+    digitalWrite(rightMotorDirectionB, HIGH);
+    digitalWrite(leftMotorDirectionA, HIGH);
+    digitalWrite(leftMotorDirectionB, LOW);
     speed = -speed;
   }
   else {
-    digitalWrite(rightMotorDirection, LOW);
-    digitalWrite(leftMotorDirection, LOW);
+    digitalWrite(rightMotorDirectionA, HIGH);
+    digitalWrite(rightMotorDirectionB, LOW);
+    digitalWrite(leftMotorDirectionA, LOW);
+    digitalWrite(leftMotorDirectionB, HIGH);
   }
 
   if (speed > 255) speed = 255;  
     
   analogWrite(rightMotorPWM, speed);
   analogWrite(leftMotorPWM, speed);
+  
+  delay(1000);
+  Stop();
 }  
 
 void Stop()
@@ -104,12 +120,15 @@ int checkBattery()
 } 
 
 
+
 void setup()
 {
 	Serial.begin(SERIALSPEED);
         
-        pinMode(rightMotorDirection, OUTPUT);
-	pinMode(leftMotorDirection, OUTPUT);
+        pinMode(rightMotorDirectionA, OUTPUT);
+	pinMode(leftMotorDirectionA, OUTPUT);
+        pinMode(rightMotorDirectionB, OUTPUT);
+	pinMode(leftMotorDirectionB, OUTPUT);
 
 	acc.powerOn();
 
@@ -122,11 +141,13 @@ void setup()
         tiltServo.write(TILT_CENTER);
         panPos = PAN_CENTER;
         tiltPos = TILT_CENTER;
+        
+        Stop();
 }
 
 void loop()
 {
-	byte msg[3];
+        byte msg[3];
         int speedToGo = DEFAULT_SPEED;
         int stepsToGo = 1;
 	if (acc.isConnected()) {
@@ -148,20 +169,20 @@ void loop()
                   case 'W':    // move forward
                   case 'w':
                   case 'f':    // just for testing with web ***********************************
-                    move(-speedToGo);
+                    turn(-speedToGo);
                     break;
                   case 'S':    // move backward
                   case 's':
                   case 'b':   // just for testing with web ***********************************
-                    move(speedToGo);
+                    turn(speedToGo);
                     break;
                   case 'D':    // turn right
                   case 'd':
-                    turn(-speedToGo);
+                    move(-speedToGo);
                     break;
                   case 'A':    // turn left
                   case 'a':
-                    turn(speedToGo);
+                    move(speedToGo);
                     break;
                   case 'X':    // stop
                   case 'x':
@@ -218,8 +239,8 @@ void loop()
                   case 'r':
                     break;  // not implemented yet
                   
-                    
-                  /*case 'P':
+                  /*  
+                  case 'P':
                   case 'p':
                     digitalWrite(powerPin, LOW);
                     delay(500);
@@ -233,7 +254,7 @@ void loop()
                   case 'b':
                     Serial.print(checkBattery());
                     break;
-                  */  
+                   */
                   default:
                     //Serial.println("did not recognize command ");
                     break;
